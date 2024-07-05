@@ -1,0 +1,191 @@
+{% extends "feed/base.html" %}
+{% load static %}
+{% block title %}Edit Profile (@{{ user.username }}) - {% endblock title %}
+{% block content %}
+<div class="middle-wrap">
+    <div class="card w-100 border-0 bg-white shadow-xs p-0 mb-4">
+        <div class="card-body p-4 w-100 bg-current border-0 d-flex rounded-3">
+            <a href="/{{ user.username }}/" class="d-inline-block mt-2"><i class="ti-arrow-left font-sm text-white"></i></a>
+            <h4 class="font-xs text-white fw-600 ms-4 mb-0 mt-2">Account Details</h4>
+        </div>
+        <div class="card-body p-lg-5 p-4 w-100 border-0 ">
+        <form method="POST" enctype="multipart/form-data" >
+            {% csrf_token %}
+            <div class="row justify-content-center">
+                <div>
+                    <input type="file" name="cover_img" id="id_cover_img" class="input-file">
+                    <label for="id_cover_img"class="bg-white btn-tertiary js-labelFile card-body h250 border-0 p-0 rounded-xxl overflow-hidden w-100">
+                        <img src="{{ MEDIA_URL }}{% if user.cover_img %}{{ user.cover_img }}{% else %}profile/defaultcover.jpg{% endif %}" alt="cover_img" class="w-100" style="width: 100%;aspect-ratio: 4/1;object-fit: cover;object-position: center;" id="get_cover_img">
+                    </label>
+                </div>
+                <div class="col-lg-4 text-center">
+                    <input type="file" name="profile_img" id="id_profile_img" class="input-file">
+                    <label for="id_profile_img" class="bg-white btn-tertiary js-labelFile p-1 border-dashed rounded-circle w100" style="margin-top: -55px !important;">
+                        <img src="{{ MEDIA_URL }}{% if user.profile_img %}{{ user.profile_img }}{% else %}profile/defaultpic.png{% endif %}" alt="profile_img" class="w-100 rounded-circle" id="get_profile_img" style="aspect-ratio: 1;object-fit: cover;object-position: center;">
+                    </label>
+                    <h2 class="fw-700 font-sm text-grey-900 mt-3">{{ user.full_name }}</h2>
+                    <h4 class="text-grey-500 fw-500 mb-3 font-xsss mb-4">{{ user.username }}</h4>    
+                </div>
+            </div>
+            {% if messages %}
+                {% for message in messages %}
+                <span class="fw-600 font-xsss my-1 {% if message.tags %}text-{{ message.tags }}{% endif %}">{{ message }}</span>
+                {% endfor %}
+            {% endif %} 
+            <div class="row">
+                <div class="col-lg-6 mb-3">
+                    <div class="form-group">
+                        <label class="mont-font fw-600 font-xsss">Full Name <span class="text-red">*</span></label>
+                        <input type="text" class="form-control" value="{{ user.full_name }}" name="full_name" id="id_full_name" required>
+                    </div>        
+                </div>
+
+                <div class="col-lg-6 mb-3">
+                    <div class="form-group">
+                        <label class="mont-font fw-600 font-xsss">Username <span class="text-red">*</span></label>
+                        <input type="text" pattern="^[A-Za-z0-9_][A-Za-z0-9_.]{3,28}[A-Za-z0-9_]$" class="form-control" value="{{ user.username }}" name="username" id="id_username" onkeyup="checkUsername(this.value)" required>
+                        <span class="font-xsss" id="username_validation" style="display: block;"></span>     
+                        <span class="font-xsss">Can contain Alphanumeric, underscore or dots.</span>     
+                    </div>        
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-6 mb-3">
+                    <div class="form-group">
+                        <label class="mont-font fw-600 font-xsss">Email <span class="text-red">*</span></label>
+                        <input type="email" class="form-control" value="{{ user.email }}" name="email" id="id_email" required>
+                    </div>        
+                </div>
+                <div class="col-lg-6 mb-3">
+                    <div class="form-group">
+                        <label class="mont-font fw-600 font-xsss">Date of Birth <span class="text-red">*</span></label>
+                        <input type="date" class="form-control" id="id_birth_date" name="birth_date" value="{{ user.birth_date|date:"Y-m-d" }}" required>
+                    </div>       
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-6 mb-3">
+                    <div class="form-group">
+                        <label class="mont-font fw-600 font-xsss">Gender</label>
+                        <select class="form-control lh-16" name="gender" id="id_gender">
+                            <option {% if user.gender == "" %}selected{% endif %} disabled>---------</option>
+                            <option value="male" {% if user.gender == "male" %}selected{% endif %}>Male</option>
+                            <option value="female" {% if user.gender == "female" %}selected{% endif %}>Female</option>
+                            <option value="empty" {% if user.gender == "empty" %}selected{% endif %}>Prefer not to say</option>
+                          </select>
+                    </div>        
+                </div>
+                <div class="col-lg-6 mb-3">
+                    <div class="form-group">
+                        <label class="mont-font fw-600 font-xsss">Account Type</label>
+                        <select class="form-control lh-16" name="is_private" id="id_is_private">
+                            <option value=false {% if not user.is_private %}selected{% endif %}>Public</option>
+                            <option value=true  {% if user.is_private %}selected{% endif %}>Private</option>
+                        </select>
+                    </div>        
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-12 mb-3">
+                    <div class="form-group">
+                        <label class="mont-font fw-600 font-xsss">Bio</label>
+                        <textarea class="form-control mb-0 p-3 h100 lh-16" rows="7" placeholder="Write your bio..." spellcheck="false" name="bio" id="id_bio">{{ user.bio }}</textarea>
+                    </div>        
+                </div>
+                <div class="col-lg-6 mb-3">
+                    <div class="form-group">
+                        <label class="mont-font fw-600 font-xsss">Address</label>
+                        <input type="text" class="form-control" value="{{ user.location }}" name="location" id="id_location">
+                    </div>        
+                </div>
+                <div class="col-lg-6 mb-3">
+                    <div class="form-group">
+                        <label class="mont-font fw-600 font-xsss">Website</label>
+                        <input type="url" class="form-control" value="{{ user.website }}" name="website" id="id_website">
+                    </div>        
+                </div>
+                
+                <div class="col-lg-12">
+                    <button type="submit" id="register_button" class="bg-current text-center text-white font-xsss fw-600 p-3 w175 rounded-3 d-inline-block border-0">Save</button>
+                </div>
+            </div>
+        </form>
+        </div>
+    </div>
+    <!-- <div class="card w-100 border-0 p-2"></div> -->
+</div>
+<script>
+    window.addEventListener("load", function(event) {       
+        $("#id_cover_img").change(function() {
+            let inputFiles = this.files;
+            console.log(inputFiles);
+            let iImg = document.getElementById('get_cover_img');
+            var reader = new FileReader();
+            reader.onload = function (e) {
+                iImg.src = e.target.result;
+            }
+            reader.readAsDataURL(inputFiles[0]);
+        });
+        $("#id_profile_img").change(function() {
+            let inputFiles = this.files;
+            console.log(inputFiles);
+            let iImg = document.getElementById('get_profile_img');
+            var reader = new FileReader();
+            reader.onload = function (e) {
+                iImg.src = e.target.result;
+            }
+            reader.readAsDataURL(inputFiles[0]);
+        });
+    });
+
+    function checkUsername(username){
+        var pattern = /^[A-Za-z0-9_][A-Za-z0-9_.]{3,28}[A-Za-z0-9_]$/;
+        var username_validation = document.getElementById('username_validation');
+        var register_button = document.getElementById("register_button");
+        if (!(pattern.test(username)) || username.length <= 4) {
+            username_validation.innerHTML = "❌ Invalid Username";
+            username_validation.style.color = "red";
+            register_button.disabled = true;
+            register_button.style.backgroundColor = "#656879";
+            register_button.classList.remove('bg-current');
+            return;
+        }
+        if (username === "{{ user.username }}" ) {
+            return;
+        }
+        $.ajax({
+            url: '{% url "user_checkusername" %}', 
+            method: 'POST',
+            data: {
+                user_name_short: username,
+                csrfmiddlewaretoken: document.getElementsByName('csrfmiddlewaretoken')[0].value,
+                // add more key-value pairs as needed
+            },
+            success: function(response) {
+                if (response.success){
+                    username_validation.innerHTML = "✔ " + response.message
+                    username_validation.style.color = "green";
+                    register_button.disabled = false;
+                    register_button.classList.add('bg-current');
+                } else {
+                    username_validation.style.color = "red";
+                    register_button.disabled = true;
+                    register_button.style.backgroundColor = "#656879";
+                    register_button.classList.remove('bg-current');
+                }
+                // do something with the response data
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+                username_validation.innerHTML = "❌ Username cannot be taken";
+                username_validation.style.color = "red";
+                register_button.disabled = true;
+                register_button.style.backgroundColor = "#656879";
+                register_button.classList.remove('bg-current');
+            // handle the error case
+            }
+            });
+    }
+        
+</script>
+
+{% endblock content %}

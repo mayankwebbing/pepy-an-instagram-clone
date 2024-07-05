@@ -54,3 +54,6 @@ venv.bak/
 # Code Editors
 .idea/
 .vscode/
+
+# Other
+/static/ignore

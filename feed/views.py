@@ -1,9 +1,10 @@
 from django.shortcuts import render, redirect
 from accounts.models import Profile
-from feed.models import Post, PostMedia, Comment
+from feed.models import Post, PostMedia, Comment, Reaction
 from django.http import JsonResponse
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
+from django.contrib.auth.decorators import login_required
 
 # Create your views here.
 def home(request):
@@ -57,12 +58,10 @@ def profile(request, username):
         else:
             am_i_following = False
 
-        return render(request, 'feed/profile.html', context={"user": user,
-                                                             "am_i_following": am_i_following,
-                                                             "user_posts": user_posts,
-                                                             "user_followers": user_followers,
-                                                             "user_following": user_following})
+        return render(request, 'feed/profile.html', status=200, context={"user": user, "am_i_following": am_i_following, "user_posts": user_posts, "user_followers": user_followers, "user_following": user_following})
     except Profile.DoesNotExist:
+        return render(request, '404.html', {}, status=404)
+    except Exception as e:
         return render(request, '404.html', {}, status=404)
 
 def profile_post(request, username, post):
@@ -80,11 +79,13 @@ def profile_post(request, username, post):
             'user_has_liked': user_has_liked,
         }
 
-        return render(request, 'feed/post.html', context=context)
+        return render(request, 'feed/post.html', context=context, status=200)
     except Profile.DoesNotExist:
         return render(request, '404.html', {}, status=404)
     except Post.DoesNotExist:
         return render(request, '404.html', {}, status=404)
+    except Exception as e:
+        return redirect(f'/{username}/', status=302)
     
 def post_comment(request):
     if request.method == "POST" and request.user.is_authenticated:
@@ -106,4 +107,24 @@ def post_comment(request):
             return JsonResponse({'success': True, 'message': 'Post Successful'}, status=200)
         
         return JsonResponse({'success': False, 'message': 'Something Went Wrong'}, status=406)
+    return redirect('home')
+
+@login_required
+def post_like(request):
+    if request.method == "POST":
+        try:
+            postId = request.POST.get('post')
+            print(postId)
+            user = request.user
+            post = Post.objects.get(id=postId)
+            if user.likes.filter(post_id=post).exists():
+                user.likes.filter(post_id=post).delete()
+                return JsonResponse({'success': True, 'message': 'Post Unliked!'}, status=200)
+            else:
+                newReaction = Reaction(user_id=user, post_id=post)
+                newReaction.save()
+                user.likes.add(newReaction)
+                return JsonResponse({'success': True, 'message': 'Post Liked!'}, status=200)
+        except Post.DoesNotExist:
+            return JsonResponse({'success': False, 'message': 'Post does not exist!'}, status=404)
     return redirect('home')

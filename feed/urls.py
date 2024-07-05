@@ -8,4 +8,5 @@ urlpatterns = [
     path('explore/', views.explore, name="explore"),
     path('search/', views.search, name="search"),
     path('notifications/', views.notifications, name="notifications"),
+    path('like-post/', views.post_like, name="like_post"),
 ]

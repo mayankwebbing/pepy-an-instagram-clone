@@ -40,7 +40,7 @@ class Reaction(models.Model):
     )
     user_id = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='likes')
     post_id = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='likes')
-    reaction = models.CharField(max_length=255, choices=REACTION_CHOICES)
+    reaction = models.CharField(max_length=255, choices=REACTION_CHOICES, default="like")
     created_at = models.DateTimeField(auto_now_add=True)
     
     def __str__(self):

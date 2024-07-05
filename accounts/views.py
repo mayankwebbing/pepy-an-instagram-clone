@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-from accounts.models import Profile
+from accounts.models import Profile, ChangeUsername
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
@@ -7,19 +7,19 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import re
 import time
+import datetime
 
 # Create your views here.
 def user_login(request):
-    if request.method == "POST":
+    next = request.GET.get('next', None)
+    if request.user.is_authenticated:
+        if next:
+            return redirect(next)
+        return redirect('home')
+    elif request.method == "POST":
         username = request.POST.get('email')
         password = request.POST.get('password')
     
-        # Check if a user with the provided username exists
-        # if not Profile.objects.filter(email=username).exists():
-        #     # Display an error message if the username does not exist
-        #     messages.error(request, 'Sorry, your email was incorrect. Please double-check your email.')
-        #     return redirect('user_login')
-         
         # Authenticate the user with the provided username and password
         user = authenticate(request, username=username, password=password)
          
@@ -27,6 +27,8 @@ def user_login(request):
             if user.is_active:
                 # Log in the user and redirect to the home page upon successful login
                 login(request, user)
+                if next:
+                    return redirect(next)
                 return redirect('home')
             else:
                 messages.error(request, 'Account is inactive.')
@@ -34,10 +36,15 @@ def user_login(request):
             # Display an error message if authentication fails (invalid password)
             messages.error(request, "Invalid username or password.")
         
-    return render(request, 'accounts/auth/login.html', {})
+    return render(request, 'accounts/auth/login.html', {"next": next})
 
 def user_register(request):
-    if request.method == "POST":
+    next = request.GET.get('next', None)
+    if request.user.is_authenticated:
+        if next:
+            return redirect(next)
+        return redirect('home')
+    elif request.method == "POST":
         full_name = request.POST.get('user_name_full')
         username = request.POST.get('user_name_short')
         email = request.POST.get('user_email')
@@ -78,9 +85,11 @@ def user_register(request):
         login(request, user)
         update_session_auth_hash(request, user)  # Important to keep the user logged in
         messages.success(request, 'Profile successfully created!')
-        return redirect('home')
+        if next:
+            return redirect(next)
+        return redirect('user_edit')
         
-    return render(request, 'accounts/auth/register.html', {})
+    return render(request, 'accounts/auth/register.html', {"next": next})
 
 def check_username(request):
     if request.method == "POST":
@@ -100,7 +109,72 @@ def check_username(request):
     return redirect('user_register')
 
 def user_forget(request):
+    next = request.GET.get('next', None)
+    if request.user.is_authenticated:
+        if next:
+            return redirect(next)
+        return redirect('home')
+    elif request.method == "POST":
+        pass
     return render(request, 'accounts/auth/forgot.html', {})
+
+@login_required
+def user_edit(request):
+    if request.method == "POST":
+        full_name = request.POST.get('full_name')
+        username = request.POST.get('username').lower()
+        email = request.POST.get('email').lower()
+        birth_date = request.POST.get('birth_date')
+        gender = request.POST.get('gender', '')
+        is_private = True if request.POST.get('is_private') == "true" else False
+        bio = request.POST.get('bio')
+        location = request.POST.get('location')
+        website = request.POST.get('website').lower()
+        
+        user = request.user
+
+        # 1 - check if username follows the valid regex
+        regex = "^[A-Za-z0-9_][A-Za-z0-9_.]{3,28}[A-Za-z0-9_]$"
+        if not re.match(regex, username):
+            messages.error(request, 'Invalid Username!')
+            return redirect('user_edit')
+        
+        # 2 - Check if the username with the provided email exists
+        elif (user.email != email) and Profile.objects.filter(email=email).exists():
+            # Display an error message if the email exists
+            messages.error(request, 'Email already exists!')
+            return redirect('user_edit')
+        
+        # 3 - Check if the username with the provided username exists
+        elif (user.username != username) and Profile.objects.filter(username=username).exists():
+            # Display an error message if the username exists
+            messages.error(request, 'Username already exists!')
+            return redirect('user_edit')
+        
+        if 'cover_img' in request.FILES:
+            user.cover_img = request.FILES['cover_img']
+        if 'profile_img' in request.FILES:
+            user.profile_img = request.FILES['profile_img']
+        
+        new_date = datetime.date(*tuple(map(int, birth_date.split("-"))))
+        user.birth_date = new_date
+
+        if user.username != username:
+            username_changed = ChangeUsername(user_id=user, new_username=username, old_username=user.username)
+            username_changed.save()
+            user.username = username
+
+        user.full_name = full_name
+        user.email = email
+        user.gender = gender
+        user.is_private = is_private
+        user.bio = bio
+        user.location = location
+        user.website = website
+
+        user.save()
+    
+    return render(request, 'accounts/auth/edit.html', {})
 
 @login_required
 def user_logout(request):

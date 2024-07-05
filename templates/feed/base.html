@@ -16,7 +16,7 @@
     <link rel="stylesheet" href="{% static "css/emoji.css" %}">
 </head>
 
-<body class="color-theme-pink mont-font theme-dark">
+<body class="mont-font color-theme-blue">
 
     <div class="preloader"></div>
   
@@ -25,21 +25,23 @@
         <!-- navigation left -->
         {% if request.user.is_authenticated %}
         <nav class="navigation scroll-bar">
+            <div class="form-group icon-input">
+                <img src="{% static "images/logo.png" %}" class="px-3 w-500 my-3 logo" style="width: 150px;">
+            </div>
             <form action="#" class="header-search">
                 <div class="form-group mb-0 icon-input">
-                    <i class="feather-search font-sm text-grey-400"></i>
-                    <input type="text" placeholder="Start typing to search.." class="bg-grey border-0 lh-32 pt-2 pb-2 ps-5 pe-3 font-xssss fw-500 rounded-xl theme-dark-bg text-grey-500">
+                    <i class="feather-search font-sm text-grey-700"></i>
+                    <input type="text" placeholder="Start typing to search.." class="bg-grey border-0 lh-32 pt-2 pb-2 ps-5 pe-3 font-xssss fw-500 rounded-xl theme-dark-bg text-grey-900">
                 </div>
             </form>
             <div class="container ps-0 pe-0">
                 <div class="nav-content">
                     <div class="nav-wrap bg-white bg-transparent-card rounded-xxl shadow-xss pt-3 pb-1 mb-2 mt-2">
-                        <div class="nav-caption fw-600 font-xssss text-grey-500"><span>New </span>Feeds</div>
                         <ul class="mb-1 top-content">
                             <li class="logo d-none d-xl-block d-lg-block"></li>
                             <li><a href="{% url "home" %}" class="nav-content-bttn open-font" ><i class="feather-tv btn-round-md bg-blue-gradiant me-3"></i><span>Feed</span></a></li>
                             <li><a href="{% url "explore" %}" class="nav-content-bttn open-font" ><i class="feather-globe btn-round-md bg-gold-gradiant me-3"></i><span>Explore</span></a></li>
-                            <li><a href="/{{ request.user.username }}/" class="nav-content-bttn open-font"><img src="{{ MEDIA_URL }}{{ request.user.profile_img }}" alt="user" class="shadow-xss btn-round-md me-3"><span>Profile </span></a></li>                        
+                            <li><a href="/{{ request.user.username }}/" class="nav-content-bttn open-font"><img src="{{ MEDIA_URL }}{{ request.user.profile_img }}" alt="user" class="shadow-xss btn-round-md me-3 p-0 bg-white"><span>Profile </span></a></li>
                             <li><a href="{% url "user_logout" %}" class="nav-content-bttn open-font"><i class="feather-log-out btn-round-md bg-mini-gradiant me-3"></i><span>Logout </span></a></li>                        
                         </ul>
                     </div>
@@ -48,12 +50,9 @@
         </nav>
         {% else %}
         <nav class="navigation scroll-bar">
-            <form action="#" class="header-search">
-                <div class="form-group mb-0 icon-input">
-                    <i class="feather-search font-sm text-grey-400"></i>
-                    <input type="text" placeholder="Start typing to search.." class="bg-grey border-0 lh-32 pt-2 pb-2 ps-5 pe-3 font-xssss fw-500 rounded-xl theme-dark-bg text-grey-500">
-                </div>
-            </form>
+            <div class="form-group icon-input">
+                <img src="{% static "images/logo.png" %}" class="px-3 w-500 my-3 logo" style="width: 150px;">
+            </div>
             <div class="container ps-0 pe-0">
                 <div class="nav-content">
                     <div class="nav-wrap bg-white bg-transparent-card rounded-xxl shadow-xss pt-3 pb-1 mb-2 mt-2">
@@ -69,17 +68,11 @@
         {% endif %}
         <!-- navigation left -->
         <!-- main content -->
-        <div class="main-content"
-        {% comment %} {% if not request.user.is_authenticated %}
-            style="padding: 20px 5%;"
-        {% endif %} {% endcomment %}
-        >
-            
+        <div class="main-content">
             <div class="middle-sidebar-bottom">
                 <div class="middle-sidebar-left">
                     {% block content %}{% endblock %}
                 </div>
-                
             </div>            
         </div>
         <!-- main content -->
@@ -89,10 +82,10 @@
             <a href="{% url "home" %}" class="nav-content-bttn nav-center"><i class="feather-home"></i></a>
             <a href="{% url "explore" %}" class="nav-content-bttn"><i class="feather-globe"></i></a>
             <a href="{% url "notifications" %}" class="nav-content-bttn"><i class="feather-bell"></i></a>
-            <a href="/{{ request.user.username }}/" class="nav-content-bttn"><img src="{{ MEDIA_URL }}{{ request.user.profile_img }}" alt="user" class="w30 shadow-xss"></a>
+            <a href="/{{ request.user.username }}/" class="nav-content-bttn"><img src="{{ MEDIA_URL }}{{ request.user.profile_img }}" alt="user" class="w30 shadow-xss rounded-circle p-0 bg-white"></a>
             {% else %}
             <a href="{% url "explore" %}" class="nav-content-bttn nav-center"><i class="feather-globe"></i></a>
-            <a href="{% url "user_login" %}" class="nav-content-bttn"><img src="{% static "images/female-profile.png" %}" alt="user" class="w30 shadow-xss"></a>
+            <a href="{% url "user_login" %}" class="nav-content-bttn"><img src="{% static "images/female-profile.png" %}" alt="user" class="w30 shadow-xss rounded-circle p-0 bg-white"></a>
             {% endif %}
         </div>
 

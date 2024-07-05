@@ -32,7 +32,7 @@
                         <div class="form-group mb-1">
                             <button type="submit" name="login" class="form-control text-center style2-input text-white fw-600 bg-dark border-0 p-0 ">Login</button>
                         </div>
-                        <h6 class="text-grey-500 font-xsss fw-500 mt-0 mb-0 lh-32">Dont have account <a href="{% url "user_register" %}" class="fw-700 ms-1">Register</a></h6>
+                        <h6 class="text-grey-500 font-xsss fw-500 mt-0 mb-0 lh-32">Dont have account <a href="{% url "user_register" %}{% if next %}?next={{ next }}{% endif %}" class="fw-700 ms-1">Register</a></h6>
                     </div>
                 </form>
                  

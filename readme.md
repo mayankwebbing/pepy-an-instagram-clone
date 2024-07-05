@@ -4,11 +4,10 @@ This python web application focuses on creating basic functionalities provided b
 
 To Do's:
 - [x] Account Register, Login & Logout
-- [ ] Profile Edit
-- [ ] Private & Public Profile
+- [x] Profile Edit
 - [x] Post
 - [x] Comment & Reply
-- [ ] Like
+- [x] Like
 - [ ] Mutual Profile Suggestions
 - [ ] Feed
 - [ ] Explore

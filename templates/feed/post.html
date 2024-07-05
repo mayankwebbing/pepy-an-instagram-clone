@@ -18,33 +18,34 @@
     </div>                             
     <div class="col-xl-5 col-xxl-3 col-lg-5">
         <div class="card-body ps-2 pe-4 pb-0 d-flex">
-            <a href="/{{ user.username }}/" class="d-flex">
+            <a href="/{{ user.username }}/" class="d-flex" title="{{ user.full_name }}">
                 <figure class="avatar me-3"><img src="{{ MEDIA_URL }}{{ user.profile_img }}" alt="{{ user.full_name }}"
                         class="shadow-sm rounded-circle w45"></figure>
                 <h4 class="fw-700 text-grey-900 font-xssss mt-1 text-left">{{ user.full_name }}<span
                         class="d-block font-xssss fw-500 mt-1 lh-3 text-grey-500">{{ user.username }}</span>
                 </h4>
             </a>
-            <a href="#" class="ms-auto"><i class="ti-more-alt text-grey-900 btn-round-md bg-greylight font-xss"></i></a>
+            <a href="javascript:void(0);" title="Copy Post Link" onclick="navigator.clipboard.writeText('{{request.build_absolute_uri}}')" class="ms-auto"><i class="ti-link text-grey-900 btn-round-md bg-greylight font-xss"></i></a>
         </div>
-        <div class="chat-left scroll-bar theme-dark-bg">
+        <div class="reply-box scroll-bar theme-dark-bg">
             <div class="card w-100 border-0 shadow-none right-scroll-bar">
                 <div class="card-body border-top-xs pt-4 pb-3 pe-4 d-block ps-5">
                     <figure class="avatar position-absolute left-0 ms-2 mt-1">
                         <img src="{{ MEDIA_URL }}{{ user.profile_img }}" class="shadow-sm rounded-circle w35">
                     </figure>
                     <div class="chat p-1 rounded-xxl d-block text-left">
-                        <h4 class="fw-700 text-grey-900 font-xssss mt-0 mb-1"><a class="text-white" href="/{{ user.username }}/">{{ user.username }}</a></h4>
+                        <h4 class="fw-700 text-grey-900 font-xssss mt-0 mb-1"><a class="text-black" href="/{{ user.username }}/" title="{{ user.full_name }}">{{ user.username }}</a></h4>
                         <p class="fw-500 text-grey-500 lh-20 font-xssss w-100 mt-2 mb-0">{{ post.caption }}</p>
                     </div>
                 </div>
+                {% if request.user.is_authenticated %}
                 {% for comment in comments %}
                     <div class="card-body pt-0 pb-3 pe-4 d-block ps-5">
                         <figure class="avatar position-absolute left-0 ms-2 mt-1">
                             <img src="{{ MEDIA_URL }}{{ comment.user_id.profile_img }}" class="shadow-sm rounded-circle w35">
                         </figure>
                         <div class="chat p-1 rounded-xxl d-block text-left">
-                            <h4 class="fw-700 text-grey-900 font-xssss mt-0 mb-1"><a class="text-white" href="/{{ comment.user_id.username }}/">{{ comment.user_id.username }}</a>{% if request.user.is_authenticated %}<a class="ms-auto"><i cid="{{comment.id}}" user="{{ comment.user_id.username }}" class="reply_this ti-back-left float-right text-white font-xsss" title="Reply"></i></a>{% endif %}</h4>
+                            <h4 class="fw-700 text-grey-900 font-xssss mt-0 mb-1"><a class="text-black" href="/{{ comment.user_id.username }}/"  title="{{ comment.user_id.full_name }}">{{ comment.user_id.username }}</a>{% if request.user.is_authenticated %}<a class="ms-auto"><i cid="{{comment.id}}" user="{{ comment.user_id.username }}" class="reply_this ti-back-left float-right text-black font-xsss" title="Reply"></i></a>{% endif %}</h4>
                             <p class="fw-500 text-grey-500 lh-20 font-xssss w-100 mt-2 mb-0">{{ comment.text }}</p>
                         </div>
                     </div>
@@ -54,22 +55,21 @@
                             <img src="{{ MEDIA_URL }}{{ reply.user_id.profile_img }}" class="shadow-sm rounded-circle w35">
                         </figure>
                         <div class="chat p-1 rounded-xxl d-block text-left">
-                            <h4 class="fw-700 text-grey-900 font-xssss mt-0 mb-1"><a class="text-white" href="/{{ reply.user_id.username }}/">{{ reply.user_id.username }}</a>{% if request.user.is_authenticated %}<a class="ms-auto"><i cid="{{comment.id}}" user="{{ reply.user_id.username }}" class="reply_this ti-back-left float-right text-white font-xsss" title="Reply"></i></a>{% endif %}</h4>
+                            <h4 class="fw-700 text-grey-900 font-xssss mt-0 mb-1"><a class="text-black" href="/{{ reply.user_id.username }}/"   title="{{ reply.user_id.full_name }}">{{ reply.user_id.username }}</a>{% if request.user.is_authenticated %}<a class="ms-auto"><i cid="{{comment.id}}" user="{{ reply.user_id.username }}" class="reply_this ti-back-left float-right text-black font-xsss" title="Reply"></i></a>{% endif %}</h4>
                             <p class="fw-500 text-grey-500 lh-20 font-xssss w-100 mt-2 mb-0">{{ reply.text }}</p>
                         </div>
                     </div>
                     {% endfor %}
                 {% endfor %}
+                {% endif %}
             </div>
         </div>
         <div class="d-flex pt-0 mt-0">
-            <a href="#" class="d-flex align-items-center fw-600 text-grey-900 lh-26 font-xssss me-3 text-dark">
-                <i class="feather-heart text-white bg-red-gradiant me-2 btn-round-xs font-xss"></i>
-                {% if post.likes.count > 1 %}{{ post.likes.count }} Likes{% else %}{{ post.likes.count }} Like{% endif %}
+            <a id="toggleLike" href="{% if not request.user.is_authenticated %}{% url "user_login" %}{% endif %}" class="d-flex align-items-center fw-600 text-grey-900 lh-26 font-xssss me-3 text-dark">
+                <span class="text-red me-2 btn-round-xs font-xss">❤</span><m id="likeCount">{{ post.likes.count }}</m>&nbsp;{% if post.likes.count > 1 %}Likes{% else %}Like{% endif %}
             </a>
-            <a href="#" class="d-flex align-items-center fw-600 text-grey-900 lh-26 font-xssss text-dark">
-                <i class="feather-message-circle text-grey-900 btn-round-sm font-lg text-dark"></i>
-                {% if post.comments.count > 1 %}{{ post.comments.count }} Comments{% else %}{{ post.comments.count }} Comment{% endif %}
+            <a href="{% if not request.user.is_authenticated %}{% url "user_login" %}{% endif %}" class="d-flex align-items-center fw-600 text-grey-900 lh-26 font-xssss text-dark">
+                <i class="feather-message-circle text-grey-900 btn-round-sm font-lg text-dark"></i>{{ post.comments.count }}{% if post.comments.count > 1 %} Comments{% else %} Comment{% endif %}
             </a>
         </div>
         <span class="fw-500 text-grey-400 lh-20 font-xssss w-100 mt-2 mb-0">{{ post.created_at|date:"d M, Y" }}</span>
@@ -77,14 +77,16 @@
         <form id="commentBox" method="POST">
             {% csrf_token %}
             <input type="hidden" name="parent_comment" id="parent_comment" value="">
-            <button type="submit" name="comment" class="text-center bg-transparent text-white fw-600 border-0 font-xsss" style="position: relative;float: right;margin-top: -2rem;margin-right: 1rem;">Post</button>
-            <textarea id="post_comment" name="post_comment" class="bor-0 w-100 font-xssss text-white fw-500 scroll-bar  border-light-md theme-dark-bg" cols="30" rows="10" placeholder="What's on your mind?" style="height: 64px;"></textarea>
+            <button type="submit" name="comment" class="text-center bg-transparent text-black fw-600 border-0 font-xsss" style="position: relative;float: right;margin-top: -2rem;margin-right: 1rem;">Post</button>
+            <textarea id="post_comment" name="post_comment" class="rounded-xxl w-100 font-xssss text-black fw-500 scroll-bar  border-light-md theme-dark-bg p-2" cols="30" rows="10" placeholder="What's on your mind?" style="height: 150px;"></textarea>
         </form>
         {% endif %}
     </div>
 </div>
 <style>
-    
+    .reply-box {
+        max-height: calc(100vh - 250px);
+    }
 </style>
 <script>
     window.addEventListener("load", function(event) {
@@ -97,7 +99,9 @@
             margin:0
         });
     });
-
+</script>
+{% if request.user.is_authenticated %}
+<script>
     function autosize(textarea_id, row_limit) {
         // Set default for row_limit parameter
         row_limit = parseInt(row_limit ?? '6');
@@ -117,7 +121,7 @@
         // Set rows attribute to number of lines in content
         textarea.oninput = function() {
             // Reset rows attribute to get accurate scrollHeight
-            textarea.setAttribute('rows', '1');
+            textarea.setAttribute('rows', '2');
         
             // Get the computed values object reference
             const cs = getComputedStyle(textarea);
@@ -206,6 +210,36 @@
                 }
             });
         });
+
+        $("#toggleLike").click(function(e) {
+            e.preventDefault();
+            let formData = new FormData();
+            formData.append('post', "{{ post.id }}");
+            formData.append('csrfmiddlewaretoken', document.getElementsByName('csrfmiddlewaretoken')[0].value);
+            
+            $.ajax({
+                url: '{% url "like_post" %}',
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(response) {
+                    console.log("success");
+                    setTimeout(() => {
+                        location.reload();
+                    }, 1000);
+                    //if (e.target.innerHTML == "Follow") {
+                    //    document.getElementById('likeCount').innerHTML = parseInt(document.getElementById('likeCount').innerHTML) + 1;
+                    //} else {
+                    //    document.getElementById('likeCount').innerHTML = parseInt(document.getElementById('likeCount').innerHTML) - 1;
+                    //}
+                },
+                error: function(response) {
+                    console.log("failed")
+                }
+            });
+        });
     });
 </script>
+{% endif %}
 {% endblock content %}
