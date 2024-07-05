@@ -1,0 +1,9 @@
+{% extends "feed/base.html" %}
+{% load static %}
+{% block content %}
+<div style="text-align: center;height: 80vh;align-content: center;">
+    <img src="{% static "images/404.png" %}" style="max-width: min(350px, 100vw);padding: 0 2%;">
+    <h1 class="fw-700 mt-2 mb-lg-5 mb-4">Sorry, this page isn't available.</h1>
+    <h4>The link you followed may be broken, or the page may have been removed. Go back to <a href="{% url "home" %}" style="color: white;"><b>Pepy.</b></a></h4>
+</div>
+{% endblock content %}

@@ -1,0 +1,439 @@
+{% extends "feed/base.html" %}
+{% load static %}
+{% block title %}{{ user.full_name }} (@{{ user.username }}) - {% endblock title %}
+{% block content %}
+<div class="row mb-5">
+    <div class="col-lg-12">
+        <div class="card w-100 border-0 p-0 bg-white shadow-xss rounded-xxl">
+            <div class="card-body h250 p-0 rounded-xxl overflow-hidden m-3">
+                {% if user.cover_img %}
+                    <img src="{{ MEDIA_URL }}{{ user.cover_img }}" alt="{{ user.full_name }}'s Cover Image" class="user-select-none pe-none" style="width: 100%;aspect-ratio: 4/1;object-fit: cover;object-position: center;">
+                {% else %}
+                    <img src="{{ MEDIA_URL }}profile/06268b10ac8a5e6fb2d587c783f8e096.jpg" alt="{{ user.full_name }}'s Cover Image" class="user-select-none pe-none" style="width: 100%;aspect-ratio: 4/1;object-fit: cover;object-position: center;">
+                {% endif %}
+            </div>
+            <div class="card-body p-0 position-relative">
+                <figure class="avatar position-absolute w100 z-index-1" style="top:-40px; left: 30px;">
+                    {% if user.profile_img %}
+                        <img src="{{ MEDIA_URL }}{{ user.profile_img }}" alt="{{ user.full_name }} Profile Image" class="float-right p-1 bg-white rounded-circle w-100 user-select-none pe-none" style="aspect-ratio: 1;object-fit: cover;object-position: center;">
+                    {% else %}
+                        <img src="{{ MEDIA_URL }}profile/defaultpic.png" alt="{{ user.full_name }} Profile Image" class="float-right p-1 bg-white rounded-circle w-100 user-select-none pe-none" style="aspect-ratio: 1;object-fit: cover;object-position: center;">
+                    {% endif %}
+                </figure> 
+                <h4 class="fw-700 font-sm mt-2 pl-15">{{ user.full_name }}<span class="fw-500 font-xssss text-grey-500 mt-1 mb-3 d-block">@{{ user.username }}</span></h4>
+                <div class="d-flex align-items-end justify-content-end position-absolute-md right-15 top-0 me-5">
+                    {% if user.username != request.user.username %}
+                        {% if am_i_following %}
+                            <a href="#" class="d-block d-lg-block bg-primary p-2 z-index-1 rounded-3 text-white font-xsssss text-uppercase fw-700 ls-3" id="toggleFollow" aria-busy="true">Following</a>
+                        {% else %}
+                            <a href="{% if request.user.is_authenticated %}#{% else %}{% url "user_login" %}{% endif %}" class="d-block d-lg-block bg-success p-2 z-index-1 rounded-3 text-white font-xsssss text-uppercase fw-700 ls-3" id="toggleFollow" aria-busy="false">Follow</a>
+                        {% endif %}
+                    {% else %}
+                        <a href="#" class="d-block d-lg-block bg-light p-2 z-index-1 rounded-3 text-black font-xssss text-uppercase fw-700 ls-3">Edit Profile</a>
+                    {% endif %}
+                </div>
+                <h3 class="fw-700 font-sm mt-1 mb-lg-4 mb-3 px-5">
+                    <span class="fw-500 font-xsss text-grey-500 mt-1 mb-3"><b>{{ user_posts }}</b> posts</span>
+                    &nbsp;&nbsp;
+                    <span class="fw-500 font-xsss text-grey-500 mt-1 mb-3" id="myfollowers"><b id="myfollowerscount">{{ user_followers.count }}</b> followers</span>
+                    &nbsp;&nbsp;
+                    <span class="fw-500 font-xsss text-grey-500 mt-1 mb-3" id="myfollowing"><b id="myfollowingcount">{{ user_following.count }}</b> following</span>
+                </h3>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-4 col-xxl-3 col-lg-4">
+        <div class="card w-100 shadow-xss rounded-xxl border-0 mb-3 mt-3">
+            {% if user.bio %}
+                <div class="card-body d-block p-4">
+                    <h4 class="fw-700 mb-3 font-xsss text-grey-900">About</h4>
+                    <p class="fw-500 text-grey-500 lh-24 font-xssss mb-0">{{ user.bio }}</p>
+                </div>
+            {% endif %}
+            <div class="card-body d-flex {% if user.bio %}border-top-xs{% endif %}">
+                {% if user.is_private %}
+                    <i class="feather-lock text-grey-500 me-3 font-lg"></i>
+                    <h4 class="fw-700 text-grey-900 font-xssss mt-0">Private Account<span class="d-block font-xssss fw-500 mt-1 lh-3 text-grey-500">Only followers can view posts this account make</span></h4>
+                {% else %}
+                    <i class="feather-eye text-grey-500 me-3 font-lg"></i>
+                    <h4 class="fw-700 text-grey-900 font-xssss mt-0">Public Account <span class="d-block font-xssss fw-500 mt-1 lh-3 text-grey-500">Anyone can view posts this account make</span></h4>
+                {% endif %}
+            </div>
+            {% if user.location %}
+                <div class="card-body d-flex pt-0">
+                    <i class="feather-map-pin text-grey-500 me-3 font-lg"></i>
+                    <h4 class="fw-700 text-grey-900 font-xssss mt-1">{{ user.location }}</h4>
+                </div>
+            {% endif %}
+            {% if user.website %}
+                <div class="card-body d-flex pt-0">
+                    <i class="feather-globe text-grey-500 me-3 font-lg"></i>
+                    <a class="fw-500 text-grey-200 font-xssss mt-1" href="{{ user.website }}">{{ user.website }}</a>
+                </div>
+            {% endif %}
+            <div class="card-body d-flex pt-0">
+                <i class="feather-globe text-grey-500 me-3 font-lg"></i>
+                <h4 class="fw-700 text-grey-900 font-xssss mt-0">Date joined <span class="d-block font-xssss fw-500 mt-1 lh-3 text-grey-500">{{ user.created_at|date:"M, Y" }}</span></h4>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-8 col-xxl-9 col-lg-8">
+        
+        {% if user.username == request.user.username %}
+        <div class="card w-100 shadow-xss rounded-xxl border-0 ps-3 pe-3 pt-4 pb-3 mb-3 mt-3">
+            <div class="card-body p-0 user-select-none pe-none">
+                <a class="font-xssss fw-600 text-grey-500 card-body p-0 d-flex align-items-center"><i class="btn-round-sm font-xs text-primary feather-edit-3 me-2 bg-greylight"></i>Create a Post!</a>
+            </div>
+            <span id="imageFormUpdate" class="d-block font-xssss fw-500 mt-3 lh-3 text-grey-500"></span>
+            <form id="imageUploadForm" method="POST">
+                {% csrf_token %}
+                <div class="card-body p-0 mt-3 position-relative">
+                    <figure class="avatar position-absolute ms-2 mt-1 top-5 user-select-none pe-none"><img src="{{ MEDIA_URL }}{{ user.profile_img }}" alt="{{ user.full_name }} Profile Image" class="shadow-sm rounded-circle w30"></figure>
+                    <textarea id="post_comment" name="post_comment" class="h100 bor-0 w-100 rounded-xxl p-2 ps-5 font-xssss text-grey-500 fw-500 border-light-md theme-dark-bg" cols="30" rows="10" placeholder="What's on your mind?"></textarea>
+                    <div id="selectedImageContainer"></div>
+                </div>
+                <div class="card-body d-flex p-0 mt-0 float-left">
+                    <input type="file" name="attachments" style="opacity: 0;position: absolute;font-size: 10px;cursor: grab;" class="form-control-file" id="post_images" accept="image/*" multiple>
+                    <a class="d-flex align-items-center font-xssss fw-600 ls-1 text-grey-700 text-dark pe-4"><i class="font-md text-success feather-image me-2"></i><span>Photos/Videos</span></a>
+                </div>
+                <div class="card-body d-flex p-0 mt-0 float-right">                    
+                    <button type="submit" name="login" class="text-center text-linkedin fw-700 bg-light border-0 px-2 rounded-3 font-xsss ls-3">Post</button>
+                </div>
+            </form>
+        </div>
+        {% endif %}
+
+        {% comment %} <div class="w-100 shadow-xss rounded-xxl border-0 p-4 mb-3 mt-3">
+            <div class="card-body p-0 me-lg-5">
+                <svg aria-label="" fill="currentColor" height="48" role="img" viewBox="0 0 96 96" width="48" style="color: white;position: relative;display: block;float: left;margin: 10px;"><circle cx="48" cy="48" fill="none" r="47" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></circle><path d="M60.931 70.001H35.065a5.036 5.036 0 0 1-5.068-5.004V46.005A5.036 5.036 0 0 1 35.065 41H60.93a5.035 5.035 0 0 1 5.066 5.004v18.992A5.035 5.035 0 0 1 60.93 70ZM37.999 39.996v-6.998a10 10 0 0 1 20 0v6.998" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+                <p class="fw-700 text-grey-500 lh-26 font-xsss w-100">This account is private</p>
+                {% if request.user.is_authenticated %}
+                    <p class="fw-500 text-grey-500 lh-26 font-xssss w-100">Follow to see their photos and videos.</p>
+                {% else %}
+                    <p class="fw-500 text-grey-500 lh-26 font-xssss w-100">Already follow {{ user.username }}? <a href="{% url "user_login" %}" class="fw-600 text-primary ms-2">Log in</a> to see their photos and videos.</p>
+                {% endif %}
+            </div>
+        </div> {% endcomment %}
+        
+        {% if request.user.is_authenticated %}
+        {% for post in user.posts.all|dictsortreversed:"created_at" %}
+            <div class="card w-100 shadow-xss rounded-xxl border-0 p-4 mb-3 mt-3">
+                <div class="card-body p-0 d-flex">
+                    <figure class="avatar me-3"><img src="{{ MEDIA_URL }}{{ user.profile_img }}" alt="image" class="shadow-sm rounded-circle w45">
+                    </figure>
+                    <h4 class="fw-700 text-grey-900 font-xssss mt-1">{{ user.full_name }}<span class="d-block font-xssss fw-500 mt-1 lh-3 text-grey-500">{{ post.created_at|date:"d M, Y" }}</span></h4>
+                </div>
+                <div class="card-body p-0 me-lg-5">
+                    <p class="fw-500 text-grey-500 lh-24 font-xssss w-100">{{ post.caption }}</p>
+                </div>
+                {% if post.media.first %}
+                <div class="card-body d-block p-0">
+                    <div class="row ps-2 pe-2">
+                        <div class="p-1">
+                            <a href="/{{ user.username }}/{{ post.id }}/">
+                                <img src="{{ MEDIA_URL }}{{ post.media.first.image }}" loading="lazy" class="rounded-3 w-100" alt="image">
+                                {% if post.media.count > 1 %}
+                                <svg xmlns="http://www.w3.org/2000/svg" width="1.2rem" height="1.2rem" viewBox="0 0 512 512" style="position: absolute;right: 0;margin-right: 2.5rem;margin-top: 1.5rem;width: 2.5rem;height: 2.5rem;text-align: center;border-style: none;">
+                                    <path fill="white" d="M450.29 112H142c-34 0-62 27.51-62 61.33v245.34c0 33.82 28 61.33 62 61.33h308c34 0 62-26.18 62-60V173.33c0-33.82-27.68-61.33-61.71-61.33m-77.15 61.34a46 46 0 1 1-46.28 46a46.19 46.19 0 0 1 46.28-46.01Zm-231.55 276c-17 0-29.86-13.75-29.86-30.66v-64.83l90.46-80.79a46.54 46.54 0 0 1 63.44 1.83L328.27 337l-113 112.33ZM480 418.67a30.67 30.67 0 0 1-30.71 30.66H259L376.08 333a46.24 46.24 0 0 1 59.44-.16L480 370.59Z" />
+                                    <path fill="white" d="M384 32H64A64 64 0 0 0 0 96v256a64.11 64.11 0 0 0 48 62V152a72 72 0 0 1 72-72h326a64.11 64.11 0 0 0-62-48" />
+                                </svg>
+                                {% endif %}
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+                <div class="card-body d-flex p-0 mt-3">
+                    <a href="/{{ user.username }}/{{ post.id }}/" class="d-flex align-items-center fw-600 text-grey-900 text-dark lh-26 font-xssss me-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="1rem" height="1rem" viewBox="0 0 24 24" class="text-white"><path fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78l1.06-1.06a5.5 5.5 0 0 0 0-7.78"></path></svg>&nbsp;{% if post.likes.count > 1 %}{{ post.likes.count }} Likes{% else %}{{ post.likes.count }} Like{% endif %}
+                    </a>
+                    <a href="/{{ user.username }}/{{ post.id }}/" class="d-flex align-items-center fw-600 text-grey-900 text-dark lh-26 font-xssss">
+                        <i class="feather-message-circle text-dark text-grey-900 btn-round-sm font-lg"></i>{% if post.comments.count > 1 %}{{ post.comments.count }} Comments{% else %}{{ post.comments.count }} Comment{% endif %}
+                    </a>
+                </div>
+            </div>
+        {% empty %}
+            <div class="w-100 shadow-xss rounded-xxl border-0 p-4 mb-3 mt-3">
+                <div class="card-body p-0 me-lg-5">
+                    <p class="fw-700 text-grey-500 lh-26 font-xsss w-100">No Post published with this account</p>
+                </div>
+            </div>
+        {% endfor %}
+        {% else %}
+            <div class="w-100 shadow-xss rounded-xxl border-0 p-4 mb-3 mt-3">
+                <div class="card-body p-0 me-lg-5">
+                    <p class="fw-700 text-grey-500 lh-26 font-xsss w-100">Already follow {{ user.username }}? <a href="{% url "user_login" %}" class="fw-600 text-primary ms-2">Log in</a> to see their photos and videos.</p>
+                </div>
+            </div>
+        {% endif %}
+
+    </div>                             
+</div>
+{% if request.user.is_authenticated %}
+<div id="myFollower" class="modal">
+    <!-- Modal content -->
+    <div class="modal-content card shadow-xss rounded-xxl border-0 p-0">
+        <div class=" ">
+            <div class="card-body d-flex align-items-center p-4 mb-0">
+                <h4 class="fw-700 mb-0 font-xs text-grey-900">Followers</h4>
+                <span class="close">&times;</span>
+            </div>
+            {% for following in user_followers|slice:":20" %}
+            <div class="bg-transparent-card d-flex ms-3 me-3 rounded-3">
+                <figure class="avatar me-2 mb-0"><img src="{{ MEDIA_URL }}{{ following.profile_img }}" alt="{{ following.full_name }}" class="shadow-sm rounded-circle w45"></figure>
+                <h4 class="fw-700 text-grey-900 font-xsss mt-2 me-4">{{ following.full_name }} <span class="d-block font-xssss fw-500 mt-1 lh-3 text-grey-500">@{{ following.username }}</span></h4>
+                <a href="/{{ following.username }}/" class="btn-round-sm bg-white text-grey-900 feather-chevron-right font-xss mt-2 ms-auto"></a>
+            </div>
+            {% empty %}
+            <div class="bg-transparent-card d-flex ms-3 me-3 rounded-3">
+                <h4 class="fw-700 text-grey-900 font-xsss mt-2 me-4">Following list is empty</h4>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+<div id="myFollowing" class="modal">
+    <div class="modal-content card shadow-xss rounded-xxl border-0 p-0">
+        <div class=" ">
+            <div class="card-body d-flex align-items-center p-4 mb-0">
+                <h4 class="fw-700 mb-0 font-xs text-grey-900">Following</h4>
+                <span class="close">&times;</span>
+            </div>
+            {% for following in user_following|slice:":20" %}
+            <div class="bg-transparent-card d-flex ms-3 me-3 rounded-3">
+                <figure class="avatar me-2 mb-0"><img src="{{ MEDIA_URL }}{{ following.profile_img }}" alt="{{ following.full_name }}" class="shadow-sm rounded-circle w45"></figure>
+                <h4 class="fw-700 text-grey-900 font-xsss mt-2 me-4">{{ following.full_name }} <span class="d-block font-xssss fw-500 mt-1 lh-3 text-grey-500">@{{ following.username }}</span></h4>
+                <a href="/{{ following.username }}/" class="btn-round-sm bg-white text-grey-900 feather-chevron-right font-xss mt-2 ms-auto"></a>
+            </div>
+            {% empty %}
+            <div class="bg-transparent-card d-flex ms-3 me-3 rounded-3">
+                <h4 class="fw-700 text-grey-900 font-xsss mt-2 me-4">Following list is empty</h4>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+<style>
+    .user_image_selection {
+        width: 100%;
+        aspect-ratio: 1;
+        object-fit: cover;
+        border-radius: 15px;
+        background: white;
+        display: block;
+    }
+    .imgcontainer {
+        width: 32%;
+        position: relative;
+        display: inline-block;
+        margin-right: 1%;
+    }
+    .uploverlay {
+        position: absolute;
+        top: 0;
+        right: 0;
+        margin-right: 10px;
+        margin-top: 10px;
+        background: rgb(0 0 0);
+        border-radius: 50%;
+        transition: .5s ease;
+        opacity: 0;
+        color: white;
+        font-size: 12px;
+        font-weight: 600;
+        width: 22px;
+        height: 22px;
+        text-align: center;
+        border-style: none;
+    }
+    
+    .imgcontainer:hover .uploverlay {
+        opacity: 1;
+    }
+
+    /* The Modal (background) */
+    .modal {
+      display: none; /* Hidden by default */
+      position: fixed; /* Stay in place */
+      z-index: 99; /* Sit on top */
+      padding-top: 10vh; /* Location of the box */
+      left: 0;
+      top: 0;
+      width: 100%; /* Full width */
+      height: 100%; /* Full height */
+      overflow: auto; /* Enable scroll if needed */
+      background-color: rgb(219 219 219 / 36%); /* Black w/ opacity */
+    }
+    
+    /* Modal Content */
+    .modal-content {
+      background-color: #fefefe;
+      margin: auto;
+      padding: 20px;
+      border: 1px solid #888;
+      width: fit-content;
+    }
+    
+    /* The Close Button */
+    .close {
+        color: #aaaaaa;
+        float: right;
+        font-size: 2rem;
+        font-weight: bold;
+        right: 1.5rem !important;
+        top: 1.5rem !important;
+    }
+    
+    .close:hover, .close:focus {
+      color: white;
+      text-decoration: none;
+      cursor: pointer;
+    }
+</style>
+<script>
+    window.addEventListener("load", function(event) {
+        let selectedFiles = [];
+
+        // 4
+        function reinsertimg(index) {
+            console.log(index);
+            selectedFiles.splice(index, 1);
+            displaySelectedImages();
+        }
+        
+        // 3
+        function displaySelectedImages() {
+            document.getElementById('selectedImageContainer').innerHTML = '';
+            selectedFiles.forEach((file, i) => {
+                let iDiv = document.createElement('div');
+                iDiv.className = 'imgcontainer';
+                let iImg = document.createElement('img');
+                iImg.className = 'user_image_selection';
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    iImg.src = e.target.result;
+                }
+                iDiv.appendChild(iImg);
+                reader.readAsDataURL(file);
+                let iBut = document.createElement('button');
+                iBut.className = 'uploverlay';
+                iBut.addEventListener("click", function() {
+                    reinsertimg(i);
+                });
+                iBut.innerHTML = 'x';
+                iDiv.appendChild(iBut);
+                document.getElementById('selectedImageContainer').appendChild(iDiv);
+            });
+        }
+
+        // 2
+        function readURL(input) {
+            if (input.files) {
+                selectedFiles.push(...Array.from(input.files));
+                displaySelectedImages();
+            }
+        }
+
+        // 1
+        $("#post_images").change(function() {
+            readURL(this);
+        });
+
+        $("#imageUploadForm").submit(function(e) {
+            e.preventDefault();
+            let formData = new FormData();
+            selectedFiles.forEach((file, i) => {
+                formData.append('images', file);
+            });
+            formData.append('comment', document.getElementById('post_comment').value);
+            formData.append('csrfmiddlewaretoken', document.getElementsByName('csrfmiddlewaretoken')[0].value);
+            
+            $.ajax({
+                url: '{% url "create_post" %}',
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(response) {
+                    document.getElementById('imageFormUpdate').innerHTML = "Your Post has been posted :)";
+                    selectedFiles = [];
+                    displaySelectedImages();
+                    document.getElementById('imageUploadForm').reset();
+                    setTimeout(() => {
+                        location.reload();
+                    }, 2000);
+                },
+                error: function(response) {
+                    document.getElementById('imageFormUpdate').innerHTML = "Error posting your Post :(";
+                    document.getElementById('imageUploadForm').reset();
+                }
+            });
+        });
+
+        $("#toggleFollow").click(function(e) {
+            e.preventDefault();
+            let formData = new FormData();
+            selectedFiles.forEach((file, i) => {
+                formData.append('images', file);
+            });
+            formData.append('username', "{{ user.username }}");
+            
+            $.ajax({
+                url: '{% url "user_follow" %}',
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(response) {
+                    console.log("success");
+                    if (e.target.innerHTML == "Follow") {
+                        document.getElementById('myfollowerscount').innerHTML = parseInt(document.getElementById('myfollowerscount').innerHTML) + 1;
+                        e.target.innerHTML = "Following";
+                        e.target.classList.remove('bg-success');
+                        e.target.classList.add('bg-primary');
+                    } else {
+                        document.getElementById('myfollowerscount').innerHTML = parseInt(document.getElementById('myfollowerscount').innerHTML) - 1;
+                        e.target.innerHTML = "Follow";
+                        e.target.classList.remove('bg-primary');
+                        e.target.classList.add('bg-success');
+                    }
+                },
+                error: function(response) {
+                    console.log("failed")
+                }
+            });
+        });
+
+
+        // Get the modals
+        var modalmyFollower = document.getElementById("myFollower");
+        var btnfollowers = document.getElementById("myfollowers");
+        // Get the button that opens the modal
+        var modalmyFollowing = document.getElementById("myFollowing");
+        var btnfollowing = document.getElementById("myfollowing");
+        // Get the <span> element that closes the modal
+        // When the user clicks the button, open the modal 
+        btnfollowers.onclick = function() {
+            modalmyFollower.style.display = "block";
+        }
+        btnfollowing.onclick = function() {
+            modalmyFollowing.style.display = "block";
+        }
+        // When the user clicks on <span> (x), close the modal
+        $(".close").click(function() {
+            modalmyFollowing.style.display = "none";
+            modalmyFollower.style.display = "none";
+        });
+        // When the user clicks anywhere outside of the modal, close it
+        window.onclick = function(event) {
+            if (event.target == modalmyFollowing || event.target == modalmyFollower) {
+                modalmyFollower.style.display = "none";
+                modalmyFollowing.style.display = "none";
+            }
+        }
+    });
+</script>
+{% endif %}
+{% endblock content %}

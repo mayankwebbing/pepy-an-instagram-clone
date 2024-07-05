@@ -1,0 +1,211 @@
+{% extends "feed/base.html" %}
+{% load static %}
+{% block title %}{{ user.full_name }} (@{{ user.username }}) - {% endblock title %}
+{% block content %}
+<div class="row mb-5">
+    <div class="col-xl-7 col-xxl-9 col-lg-7">
+            <div>
+                <div class="card-body d-block p-0 mb-4">
+                    <div class="row">
+                        <div class="owl-carousel owl-theme">
+                            {% for attachment in post.media.all %}
+                                <img class="owl-lazy" data-src="{{ MEDIA_URL }}{{ attachment.image }}" alt="">
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+    </div>                             
+    <div class="col-xl-5 col-xxl-3 col-lg-5">
+        <div class="card-body ps-2 pe-4 pb-0 d-flex">
+            <a href="/{{ user.username }}/" class="d-flex">
+                <figure class="avatar me-3"><img src="{{ MEDIA_URL }}{{ user.profile_img }}" alt="{{ user.full_name }}"
+                        class="shadow-sm rounded-circle w45"></figure>
+                <h4 class="fw-700 text-grey-900 font-xssss mt-1 text-left">{{ user.full_name }}<span
+                        class="d-block font-xssss fw-500 mt-1 lh-3 text-grey-500">{{ user.username }}</span>
+                </h4>
+            </a>
+            <a href="#" class="ms-auto"><i class="ti-more-alt text-grey-900 btn-round-md bg-greylight font-xss"></i></a>
+        </div>
+        <div class="chat-left scroll-bar theme-dark-bg">
+            <div class="card w-100 border-0 shadow-none right-scroll-bar">
+                <div class="card-body border-top-xs pt-4 pb-3 pe-4 d-block ps-5">
+                    <figure class="avatar position-absolute left-0 ms-2 mt-1">
+                        <img src="{{ MEDIA_URL }}{{ user.profile_img }}" class="shadow-sm rounded-circle w35">
+                    </figure>
+                    <div class="chat p-1 rounded-xxl d-block text-left">
+                        <h4 class="fw-700 text-grey-900 font-xssss mt-0 mb-1"><a class="text-white" href="/{{ user.username }}/">{{ user.username }}</a></h4>
+                        <p class="fw-500 text-grey-500 lh-20 font-xssss w-100 mt-2 mb-0">{{ post.caption }}</p>
+                    </div>
+                </div>
+                {% for comment in comments %}
+                    <div class="card-body pt-0 pb-3 pe-4 d-block ps-5">
+                        <figure class="avatar position-absolute left-0 ms-2 mt-1">
+                            <img src="{{ MEDIA_URL }}{{ comment.user_id.profile_img }}" class="shadow-sm rounded-circle w35">
+                        </figure>
+                        <div class="chat p-1 rounded-xxl d-block text-left">
+                            <h4 class="fw-700 text-grey-900 font-xssss mt-0 mb-1"><a class="text-white" href="/{{ comment.user_id.username }}/">{{ comment.user_id.username }}</a>{% if request.user.is_authenticated %}<a class="ms-auto"><i cid="{{comment.id}}" user="{{ comment.user_id.username }}" class="reply_this ti-back-left float-right text-white font-xsss" title="Reply"></i></a>{% endif %}</h4>
+                            <p class="fw-500 text-grey-500 lh-20 font-xssss w-100 mt-2 mb-0">{{ comment.text }}</p>
+                        </div>
+                    </div>
+                    {% for reply in comment.replies.all %}
+                    <div class="card-body pt-0 pb-3 pe-4 d-block ps-5 ms-5 position-relative">
+                        <figure class="avatar position-absolute left-0 ms-2 mt-1">
+                            <img src="{{ MEDIA_URL }}{{ reply.user_id.profile_img }}" class="shadow-sm rounded-circle w35">
+                        </figure>
+                        <div class="chat p-1 rounded-xxl d-block text-left">
+                            <h4 class="fw-700 text-grey-900 font-xssss mt-0 mb-1"><a class="text-white" href="/{{ reply.user_id.username }}/">{{ reply.user_id.username }}</a>{% if request.user.is_authenticated %}<a class="ms-auto"><i cid="{{comment.id}}" user="{{ reply.user_id.username }}" class="reply_this ti-back-left float-right text-white font-xsss" title="Reply"></i></a>{% endif %}</h4>
+                            <p class="fw-500 text-grey-500 lh-20 font-xssss w-100 mt-2 mb-0">{{ reply.text }}</p>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% endfor %}
+            </div>
+        </div>
+        <div class="d-flex pt-0 mt-0">
+            <a href="#" class="d-flex align-items-center fw-600 text-grey-900 lh-26 font-xssss me-3 text-dark">
+                <i class="feather-heart text-white bg-red-gradiant me-2 btn-round-xs font-xss"></i>
+                {% if post.likes.count > 1 %}{{ post.likes.count }} Likes{% else %}{{ post.likes.count }} Like{% endif %}
+            </a>
+            <a href="#" class="d-flex align-items-center fw-600 text-grey-900 lh-26 font-xssss text-dark">
+                <i class="feather-message-circle text-grey-900 btn-round-sm font-lg text-dark"></i>
+                {% if post.comments.count > 1 %}{{ post.comments.count }} Comments{% else %}{{ post.comments.count }} Comment{% endif %}
+            </a>
+        </div>
+        <span class="fw-500 text-grey-400 lh-20 font-xssss w-100 mt-2 mb-0">{{ post.created_at|date:"d M, Y" }}</span>
+        {% if request.user.is_authenticated %}
+        <form id="commentBox" method="POST">
+            {% csrf_token %}
+            <input type="hidden" name="parent_comment" id="parent_comment" value="">
+            <button type="submit" name="comment" class="text-center bg-transparent text-white fw-600 border-0 font-xsss" style="position: relative;float: right;margin-top: -2rem;margin-right: 1rem;">Post</button>
+            <textarea id="post_comment" name="post_comment" class="bor-0 w-100 font-xssss text-white fw-500 scroll-bar  border-light-md theme-dark-bg" cols="30" rows="10" placeholder="What's on your mind?" style="height: 64px;"></textarea>
+        </form>
+        {% endif %}
+    </div>
+</div>
+<style>
+    
+</style>
+<script>
+    window.addEventListener("load", function(event) {
+        $('.owl-carousel').owlCarousel({
+            items:1,
+            lazyLoad:true,
+            loop:false,
+            nav:false,
+            padding:0,
+            margin:0
+        });
+    });
+
+    function autosize(textarea_id, row_limit) {
+        // Set default for row_limit parameter
+        row_limit = parseInt(row_limit ?? '6');
+        if (!row_limit) {
+            row_limit = 5;
+        }
+      
+        // Get the element
+        const textarea = document.getElementById(textarea_id);
+      
+        // Set required styles for this to function properly.
+        textarea.style.setProperty('resize', 'none');
+        textarea.style.setProperty('min-height', '0');
+        textarea.style.setProperty('max-height', 'none');
+        textarea.style.setProperty('height', 'auto');
+      
+        // Set rows attribute to number of lines in content
+        textarea.oninput = function() {
+            // Reset rows attribute to get accurate scrollHeight
+            textarea.setAttribute('rows', '1');
+        
+            // Get the computed values object reference
+            const cs = getComputedStyle(textarea);
+        
+            // Force content-box for size accurate line-height calculation
+            // Remove scrollbars, lock width (subtract inline padding and inline border widths)
+            // and remove inline padding and borders to keep width consistent (for text wrapping accuracy)
+            const inline_padding = parseFloat(cs['padding-left']) + parseFloat(cs['padding-right']);
+            const inline_border_width = parseFloat(cs['border-left-width']) + parseFloat(cs['border-right-width']);
+            textarea.style.setProperty('overflow', 'hidden', 'important');
+            textarea.style.setProperty('width', (parseFloat(cs['width']) - inline_padding - inline_border_width) + 'px');
+            textarea.style.setProperty('box-sizing', 'content-box');
+            textarea.style.setProperty('padding-inline', '0');
+            textarea.style.setProperty('border-width', '0');
+            
+            // Get the base line height, and top / bottom padding.
+            const block_padding = parseFloat(cs['padding-top']) + parseFloat(cs['padding-bottom']);
+            const line_height =
+            // If line-height is not explicitly set, use the computed height value (ignore padding due to content-box)
+            cs['line-height'] === 'normal' ? parseFloat(cs['height'])
+            // Otherwise (line-height is explicitly set), use the computed line-height value.
+            : parseFloat(cs['line-height']);
+        
+            // Get the scroll height (rounding to be safe to ensure cross browser consistency)
+            const scroll_height = Math.round(textarea.scrollHeight);
+        
+            // Undo overflow, width, border-width, box-sizing & inline padding overrides
+            textarea.style.removeProperty('width');
+            textarea.style.removeProperty('box-sizing');
+            textarea.style.removeProperty('padding-inline');
+            textarea.style.removeProperty('border-width');
+            textarea.style.removeProperty('overflow');
+        
+            // Subtract block_padding from scroll_height and divide that by our line_height to get the row count.
+            // Round to nearest integer as it will always be within ~.1 of the correct whole number.
+            const rows = Math.round((scroll_height - block_padding) / line_height);
+        
+            // Set the calculated rows attribute (limited by row_limit)
+            textarea.setAttribute("rows", "" + Math.min(rows, row_limit));
+        };
+        
+        // Trigger the event to set the initial rows value
+        textarea.dispatchEvent(new Event('input', {
+            bubbles: true
+        }));
+    }
+    
+    autosize('post_comment');
+
+    function reply(input) {
+        document.getElementById('post_comment').value = '@' + input.attributes.user.value + ' ';
+        document.getElementById('parent_comment').value = input.attributes.cid.value;
+        document.getElementById('post_comment').focus();
+    }
+
+    window.addEventListener("load", function(event) {
+        $(".reply_this").click(function() {
+            reply(this);
+        });
+
+        $("#commentBox").submit(function(e) {
+            e.preventDefault();
+            let formData = new FormData();
+            let parent_comment = document.getElementById('parent_comment').value
+            if (parent_comment != '') {
+                formData.append('parent_comment', parent_comment);
+            }
+            formData.append('post_comment', document.getElementById('post_comment').value);
+            formData.append('post_id', "{{ post.id }}");
+            formData.append('csrfmiddlewaretoken', document.getElementsByName('csrfmiddlewaretoken')[0].value);
+            
+            $.ajax({
+                url: '{% url "post_comment" %}',
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(response) {
+                    document.getElementById('commentBox').reset();
+                    setTimeout(() => {
+                        location.reload();
+                    }, 2000);
+                },
+                error: function(response) {
+                    document.getElementById('commentBox').reset();
+                }
+            });
+        });
+    });
+</script>
+{% endblock content %}

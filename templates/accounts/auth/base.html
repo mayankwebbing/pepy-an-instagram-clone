@@ -1,0 +1,35 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>{% block title %}Accounts - {% endblock %}Pepy</title>
+    <link rel="stylesheet" href="{% static "css/themify-icons.css" %}">
+    <!-- Favicon icon -->
+    <link rel="icon" type="image/png" sizes="16x16" href="{% static "images/favicon.png" %}">
+    <!-- Custom Stylesheet -->
+    <link rel="stylesheet" href="{% static "css/style.css" %}">
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+</head>
+
+<body class="color-theme-blue">
+    {% comment %} <div class="preloader"></div> {% endcomment %}
+
+    <div class="main-wrap">
+        <div class="nav-header bg-transparent shadow-none border-0">
+            <div class="nav-top w-100">
+                <a href="{% url "home" %}"><i class="ti-home text-success display1-size me-2 ms-0"></i><span class="d-inline-block fredoka-font ls-3 fw-600 text-current font-xxl logo-text mb-0">Pepy. </span> </a>
+                {% comment %} <a href="{% url "user_login" %}" class="header-btn d-none d-lg-block bg-dark fw-500 text-white font-xsss p-3 ms-auto w100 text-center lh-20 rounded-xl">Login</a>
+                <a href="{% url "user_register" %}" class="header-btn d-none d-lg-block bg-current fw-500 text-white font-xsss p-3 ms-2 w100 text-center lh-20 rounded-xl">Register</a> {% endcomment %}
+            </div>
+        </div>
+
+        {% block content %}
+
+        {% endblock content %}
+
+    </div>
+</body>
+</html>

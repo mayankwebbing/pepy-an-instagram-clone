@@ -1,0 +1,126 @@
+{% extends "accounts/auth/base.html" %}
+{% load static %}
+{% block title %}Register - {% endblock title %}
+{% block content %}
+<div class="row">
+    <div class="col-xl-5 d-none d-xl-block p-0 vh-100 bg-image-cover bg-no-repeat" style="background-image: url({% static "images/login-bg.jpg" %});"></div>
+    <div class="col-xl-7 vh-100 align-items-center d-flex bg-white rounded-3 overflow-auto">
+        <div class="card shadow-none border-0 ms-auto me-auto login-card">
+            <div class="card-body rounded-0 text-left mt-5 pt-5">
+                <h2 class="fw-700 display1-size display2-md-size mb-4">Create your account</h2>     
+                {% if messages %}
+                    {% for message in messages %}
+                    <span class="fw-600 font-xsss my-1 {% if message.tags %}text-{{ message.tags }}{% endif %}">{{ message }}</span>
+                    {% endfor %}
+                {% endif %}                   
+                <form method="POST">
+                    {% csrf_token %}
+                    <div class="form-group icon-input mb-3">
+                        <i class="font-sm ti-user text-grey-500 pe-0"></i>
+                        <input type="text" name="user_name_full" class="style2-input ps-5 form-control text-grey-900 font-xsss fw-600" autofocus placeholder="Full Name" required>                        
+                    </div>
+                    <div class="form-group icon-input mb-3">
+                        <i class="font-sm ti-userat text-grey-500 pe-0"></i>
+                        <input type="text" name="user_name_short" class="style2-input ps-5 form-control text-grey-900 font-xsss fw-600" pattern="^[A-Za-z0-9_][A-Za-z0-9_.]{3,28}[A-Za-z0-9_]$" required title="Please enter valid username only." placeholder="Username" onkeyup="checkUsername(this.value)" required>                   
+                        <span class="font-xsss" id="username_validation" style="display: block;"></span>     
+                        <span class="font-xsss">Username can only contains alphabets, underscore or dots, and must have alteast 4 characters.</span>     
+                    </div>
+                    <div class="form-group icon-input mb-3">
+                        <i class="font-sm ti-email text-grey-500 pe-0"></i>
+                        <input type="email" name="user_email" class="style2-input ps-5 form-control text-grey-900 font-xsss fw-600" placeholder="Your Email Address" required>
+                    </div>
+                    <div class="form-group icon-input mb-3">
+                        <input type="password" id="user_password" name="user_password" class="style2-input ps-5 form-control text-grey-900 font-xss ls-3" onkeyup="checkCnfPassword()" placeholder="Password" required>
+                        <i class="font-sm ti-lock text-grey-500 pe-0"></i>
+                    </div>
+                    <span id="cnf_error_txt" class="fw-600 font-xsss my-1 text-red mx-4" style="display: none;"></span>
+                    <div class="form-group icon-input mb-1">
+                        <input type="password" id="user_password_cnf" name="user_password_cnf" class="style2-input ps-5 form-control text-grey-900 font-xss ls-3" placeholder="Confirm Password" onkeyup="checkCnfPassword()" required>
+                        <i class="font-sm ti-lock text-grey-500 pe-0"></i>
+                    </div>
+                    <div class="form-check text-left mb-3">
+                        {% comment %} <input type="checkbox" class="form-check-input mt-2" id="exampleCheck2"> {% endcomment %}
+                        <label class="form-check-label font-xsss text-grey-500" for="exampleCheck2">By creating this account, you agree to the <a href="#">Terms and Conditions.</a></label>
+                    </div>
+                    <div class="col-sm-12 p-0 text-left">
+                        <div class="form-group mb-1">
+                            <button type="submit" id="register_button" name="register" class="form-control text-center style2-input text-white fw-600 bg-dark border-0 p-0 ">Register</button>
+                        </div>
+                        <h6 class="text-grey-500 font-xsss fw-500 mt-0 mb-0 lh-32">Already have a account? <a href="{% url "user_login" %}" class="fw-700 ms-1">Login</a></h6>
+                    </div>
+                </form>
+                    
+                    
+            </div>
+        </div> 
+    </div>
+</div>
+<style>
+    .ti-userat:before {
+        content: "@";
+    }
+</style>
+<script>
+    function checkCnfPassword(){
+        var cnf_error_txt = document.getElementById("cnf_error_txt");
+        var register_button = document.getElementById("register_button");
+        if (document.getElementById("user_password").value !== document.getElementById("user_password_cnf").value){
+            cnf_error_txt.innerHTML = "Password does not matches.";
+            cnf_error_txt.style.display = "block";
+            register_button.disabled = true;
+            register_button.style.backgroundColor = "#656879";
+            register_button.classList.remove('bg-dark');
+        } else {
+            cnf_error_txt.innerHTML = ""
+            cnf_error_txt.style.display = "none";
+            register_button.disabled = false;
+            register_button.classList.add('bg-dark');
+        }
+    }
+    function checkUsername(username){
+        var pattern = /^[A-Za-z0-9_][A-Za-z0-9_.]{3,28}[A-Za-z0-9_]$/;
+        var username_validation = document.getElementById('username_validation');
+        var register_button = document.getElementById("register_button");
+        if (!(pattern.test(username)) || username.length <= 4) {
+            username_validation.innerHTML = "❌ Invalid Username";
+            username_validation.style.color = "red";
+            register_button.disabled = true;
+            register_button.style.backgroundColor = "#656879";
+            register_button.classList.remove('bg-dark');
+            return;
+        }
+        $.ajax({
+            url: '{% url "user_checkusername" %}', 
+            method: 'POST',
+            data: {
+                user_name_short: username,
+                csrfmiddlewaretoken: document.getElementsByName('csrfmiddlewaretoken')[0].value,
+              // add more key-value pairs as needed
+            },
+            success: function(response) {
+                if (response.success){
+                    username_validation.innerHTML = "✔ " + response.message
+                    username_validation.style.color = "green";
+                    register_button.disabled = false;
+                    register_button.classList.add('bg-dark');
+                } else {
+                    username_validation.style.color = "red";
+                    register_button.disabled = true;
+                    register_button.style.backgroundColor = "#656879";
+                    register_button.classList.remove('bg-dark');
+                }
+              // do something with the response data
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+                username_validation.innerHTML = "❌ Username cannot be taken";
+                username_validation.style.color = "red";
+                register_button.disabled = true;
+                register_button.style.backgroundColor = "#656879";
+                register_button.classList.remove('bg-dark');
+            // handle the error case
+            }
+          });
+    }
+    
+</script>
+{% endblock content %}
