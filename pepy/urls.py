@@ -24,7 +24,7 @@ urlpatterns = [
     path('securelogin/', admin.site.urls),
     path("accounts/", include('accounts.urls')),
     path("", include('feed.urls')),
-    path('<slug:username>/', profile, name="profile_page"),
-    path('<slug:username>/<slug:post>/', profile_post, name="profile_post"),
+    path('<str:username>/', profile, name="profile_page"),
+    path('<str:username>/<str:post>/', profile_post, name="profile_post"),
 ]
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

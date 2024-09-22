@@ -7,11 +7,30 @@ from django.core.files.base import ContentFile
 from django.contrib.auth.decorators import login_required
 
 # Create your views here.
+@login_required
 def home(request):
-    return render(request, 'feed/feed.html', {})
+    latestposts = Post.objects.select_related('user_id').filter(user_id__in = request.user.following.all()).order_by('-created_at')[:30]
+
+    suggestedProfilesWithPost = Profile.objects.exclude_self(request.user).filter(posts__isnull = False).exclude(id__in = request.user.following.all()).distinct()[:6]
+
+    suggestedProfiles = Profile.objects.exclude_self(request.user).exclude(id__in = request.user.following.all()).distinct()[:6]
+
+    return render(request, 'feed/feed.html', {"allposts":latestposts, "suggestedProfilesWithPost":suggestedProfilesWithPost, "suggestedProfiles":suggestedProfiles })
 
 def explore(request):
-    return render(request, 'feed/explore.html', {})
+    explorePosts = Post.objects.select_related('user_id').exclude(user_id__in = request.user.following.all()).order_by('-created_at')[:30]
+
+    return render(request, 'feed/explore.html', {"explorePosts": explorePosts})
+
+def explore_profiles(request):
+    suggestedProfiles = Profile.objects.exclude_self(request.user).exclude(id__in = request.user.following.all()).distinct()[:20]
+
+    search = request.GET.get('search', None)
+    if search:
+        suggestedProfiles = Profile.objects.filter(full_name__contains = search) or Profile.objects.filter(username__contains = search)
+        suggestedProfiles = suggestedProfiles.distinct()[:20]
+    
+    return render(request, 'feed/explore-profile.html', {"suggestedProfiles":suggestedProfiles })
 
 def create_post(request):
     if request.method == "POST" and request.user.is_authenticated:
